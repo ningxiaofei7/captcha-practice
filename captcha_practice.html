@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>驗證碼輸入練習</title>
+<style>
+:root{font-family:Arial,"Microsoft JhengHei",sans-serif;color:#222;background:#f4f5f7}
+*{box-sizing:border-box}
+body{margin:0;padding:40px 18px}
+.wrap{max-width:760px;margin:auto}
+.card{background:#fff;border:1px solid #ddd;border-radius:18px;padding:32px}
+h1{text-align:center;margin:0 0 8px;font-size:28px}
+.sub{text-align:center;color:#666;margin-bottom:28px}
+.captcha{margin:0 auto 24px;max-width:440px;height:150px;border:1px solid #bbb;border-radius:12px;background:
+linear-gradient(14deg,transparent 48%,#d8d8d8 49%,#d8d8d8 51%,transparent 52%),
+linear-gradient(-11deg,transparent 48%,#e3e3e3 49%,#e3e3e3 51%,transparent 52%),#f7f7f7;
+display:flex;align-items:center;justify-content:center;overflow:hidden}
+#code{font-family:"Courier New",monospace;font-size:64px;font-weight:700;letter-spacing:12px;user-select:none}
+form{max-width:440px;margin:auto;display:flex;gap:10px}
+input{min-width:0;flex:1;font:700 28px "Courier New",monospace;text-align:center;letter-spacing:8px;padding:12px;border:2px solid #aaa;border-radius:10px;outline:none}
+input:focus{border-color:#333}
+button{border:0;border-radius:10px;padding:0 22px;font-size:17px;font-weight:700;cursor:pointer;background:#222;color:#fff}
+#msg{text-align:center;height:28px;margin:14px 0 4px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:22px;border-top:1px solid #ddd;padding-top:20px}
+.stat{text-align:center}.num{font-size:24px;font-weight:700}.lab{font-size:12px;color:#777;margin-top:4px}
+.actions{text-align:center;margin-top:22px}
+.actions button{background:#eee;color:#333;padding:10px 16px;font-size:14px}
+.tip{text-align:center;color:#777;font-size:13px;margin-top:18px}
+@media(max-width:520px){body{padding:20px 10px}.card{padding:22px 14px}#code{font-size:48px;letter-spacing:8px}form{flex-direction:column}button{min-height:48px}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>驗證碼輸入練習</h1>
+<div class="sub">英文＋數字隨機 4 碼｜保證兩種都有｜輸入不分大小寫</div>
+<div class="captcha"><div id="code"></div></div>
+<form id="form">
+<input id="answer" maxlength="4" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="4 碼">
+<button type="button" id="confirm">確認</button>
+</form>
+<div id="msg"></div>
+<div class="stats">
+<div class="stat"><div class="num" id="right">0</div><div class="lab">答對</div></div>
+<div class="stat"><div class="num" id="wrong">0</div><div class="lab">答錯</div></div>
+<div class="stat"><div class="num" id="acc">—</div><div class="lab">正確率</div></div>
+<div class="stat"><div class="num" id="avg">—</div><div class="lab">平均速度</div></div>
+</div>
+<div class="actions"><button type="button" id="reset">重新開始</button></div>
+<div class="tip">操作：看到驗證碼 → 輸入 4 碼 → 用滑鼠點「確認」。答對後自動出下一題。</div>
+</div></div>
+<script>
+const L='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',D='0123456789',A=L+D;
+let cur='',right=0,wrong=0,total=0,start=0;
+const $=id=>document.getElementById(id), input=$('answer'), msg=$('msg');
+function pick(s){return s[Math.floor(Math.random()*s.length)]}
+function make(){
+ let a=[pick(L),pick(D),pick(A),pick(A)];
+ for(let i=3;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+ return a.join('');
+}
+function next(){
+ cur=make(); $('code').textContent=cur; input.value=''; msg.textContent=''; start=performance.now(); input.focus();
+}
+function stats(){
+ $('right').textContent=right;$('wrong').textContent=wrong;
+ let n=right+wrong;$('acc').textContent=n?Math.round(right/n*100)+'%':'—';
+ $('avg').textContent=right?(total/right/1000).toFixed(2)+' 秒':'—';
+}
+input.addEventListener('input',()=>input.value=input.value.replace(/[^A-Za-z0-9]/g,'').slice(0,4));
+function checkAnswer(){
+ if(input.value.length<4){msg.textContent='請輸入完整 4 碼';input.focus();return}
+ if(input.value.toLowerCase()===cur.toLowerCase()){
+   right++; total+=performance.now()-start; msg.textContent='✓ 正確';
+   stats(); setTimeout(next,180);
+ }else{
+   wrong++; msg.textContent='✕ 錯誤，再輸入一次'; stats(); input.select();
+ }
+}
+$('form').addEventListener('submit',e=>e.preventDefault());
+$('confirm').addEventListener('click',checkAnswer);
+input.addEventListener('keydown',e=>{
+ if(e.key==='Enter') e.preventDefault();
+});
+$('reset').addEventListener('click',()=>{right=wrong=total=0;stats();next()});
+stats();next();
+</script>
+</body>
+</html>
