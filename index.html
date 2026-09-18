@@ -1,29 +1,90 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>驗證碼輸入練習</title><style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,"Microsoft JhengHei",sans-serif;background:#f5f5f5;color:#222}.top{height:72px;background:#fff;padding:28px 18px 0;font-size:15px;font-weight:700}.wrap{max-width:660px;margin:38px auto;background:#fff;border:1px solid #ddd;border-radius:30px;padding:70px 26px 30px;text-align:center}h1{font-size:46px;margin:0 0 42px;font-weight:800}.sub{font-size:25px;color:#777;line-height:1.45;margin-bottom:48px}.practice{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:center}input{width:100%;height:126px;border:3px solid #999;border-radius:18px;text-align:center;font-size:42px;font-weight:700;letter-spacing:7px;outline:none}input:focus{border-color:#d99a00}.captcha{height:126px;border:2px solid #bbb;border-radius:16px;background:#fafafa;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}.captcha:before,.captcha:after{content:"";position:absolute;width:130%;height:4px;background:#ddd;left:-15%;top:50%}.captcha:before{transform:rotate(14deg)}.captcha:after{transform:rotate(-12deg)}.chars{position:relative;z-index:1;display:flex;align-items:center;justify-content:center}.ch{display:inline-block;font-size:48px;font-weight:700;line-height:1;margin:0 2px}button{margin-top:26px;width:215px;height:86px;border:0;border-radius:16px;background:#222;color:#fff;font-size:28px;font-weight:700}.msg{height:52px;margin-top:22px;font-size:25px;font-weight:700}.stats{border-top:1px solid #ddd;margin-top:28px;padding-top:34px;display:grid;grid-template-columns:1fr 1fr;row-gap:24px}.num{font-size:42px;font-weight:700}.lab{font-size:20px;color:#777;margin-top:6px}.restart{width:auto;height:auto;padding:15px 28px;margin-top:26px;background:#eee;color:#333;font-size:22px}.note{font-size:16px;color:#888;margin-top:28px;line-height:1.5}@media(max-width:700px){
-body{background:#f5f5f5}
-.top{height:54px;padding:20px 16px 0;font-size:14px}
-.wrap{margin:20px 12px;padding:36px 18px 24px;border-radius:22px}
-h1{font-size:30px;margin-bottom:24px}
-.sub{font-size:17px;line-height:1.5;margin-bottom:28px}
-.practice{grid-template-columns:1.55fr 1fr;gap:10px}
-input{height:68px;border-width:2px;border-radius:12px;font-size:28px;letter-spacing:5px}
-.captcha{height:68px;border-radius:12px}
-.captcha:before,.captcha:after{height:3px}
-.ch{font-size:30px;margin:0 1px}
-button{margin-top:20px;width:170px;height:58px;border-radius:12px;font-size:22px}
-.msg{height:38px;margin-top:14px;font-size:19px}
-.stats{margin-top:20px;padding-top:24px;row-gap:18px}
-.num{font-size:30px}
-.lab{font-size:16px}
-.restart{padding:11px 20px;margin-top:20px;font-size:17px}
-.note{font-size:13px;margin-top:20px}
-}
-</style></head><body><div class="top">驗證碼輸入練習</div><main class="wrap"><h1>驗證碼輸入練習</h1><div class="sub">英文 + 數字隨機 4 碼｜保證兩種都有｜輸入<br>不分大小寫</div><div class="practice"><input id="answer" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="4"><div class="captcha"><div id="captcha" class="chars"></div></div></div><button id="confirm">確認</button><div id="msg" class="msg"></div><div class="stats"><div><div id="correct" class="num">0</div><div class="lab">答對</div></div><div><div id="wrong" class="num">0</div><div class="lab">答錯</div></div><div><div id="rate" class="num">—</div><div class="lab">正確率</div></div><div><div id="speed" class="num">—</div><div class="lab">平均速度</div></div></div><button id="restart" class="restart">重新開始</button><div class="note">0/O、I/l/1 等易混淆字元刻意保留；字元會隨機旋轉、上下偏移與變換字型。</div></main><script>
-const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",digits="0123456789",all=letters+digits;let expected="",correct=0,wrong=0,times=[],startedAt=0;
-const pick=s=>s[Math.floor(Math.random()*s.length)];
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Microsoft JhengHei",sans-serif;background:#f5f5f5;color:#222}.top{height:54px;background:#fff;padding:20px 16px 0;font-size:14px;font-weight:700}.wrap{max-width:660px;margin:20px auto;background:#fff;border:1px solid #ddd;border-radius:22px;padding:36px 18px 24px;text-align:center}h1{font-size:30px;margin:0 0 20px;font-weight:800}.sub{font-size:17px;color:#777;line-height:1.5;margin-bottom:18px}
+.ticket-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 22px;font-size:17px}.ticket-label{font-weight:700}.counter{display:flex;align-items:center;border:1px solid #aaa;border-radius:8px;overflow:hidden;height:38px}.counter button{margin:0;width:38px;height:38px;border:0;border-radius:0;background:#222;color:#fff;font-size:22px;line-height:1}.counter .count{width:44px;height:38px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;background:#fff}
+.practice{display:grid;grid-template-columns:1.55fr 1fr;gap:10px;align-items:center}#answer{width:100%;height:68px;border:2px solid #d99a00;border-radius:12px;text-align:center;font-size:28px;font-weight:700;letter-spacing:5px;outline:none;background:#fff}#answer:focus{box-shadow:0 0 0 2px rgba(217,154,0,.12)}.captcha{height:68px;border:2px solid #bbb;border-radius:12px;background:#fafafa;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}.captcha:before,.captcha:after{content:"";position:absolute;width:130%;height:3px;background:#ddd;left:-15%;top:50%}.captcha:before{transform:rotate(14deg)}.captcha:after{transform:rotate(-12deg)}.chars{position:relative;z-index:1;display:flex;align-items:center;justify-content:center}.ch{display:inline-block;font-size:30px;font-weight:700;line-height:1;margin:0 1px}
+.choices{margin:18px auto 0;max-width:330px;text-align:left;display:grid;gap:10px}.choice{display:flex;align-items:center;gap:10px;font-size:17px;cursor:pointer;user-select:none}.choice input{appearance:none;-webkit-appearance:none;width:26px;height:26px;border:3px solid #333;border-radius:50%;margin:0;flex:0 0 26px;background:#fff}.choice input:checked{border:7px solid #333}
+#confirm{margin-top:18px;width:170px;height:58px;border:0;border-radius:12px;background:#222;color:#fff;font-size:22px;font-weight:700}.msg{min-height:32px;margin-top:12px;font-size:18px;font-weight:700}.stats{border-top:1px solid #ddd;margin-top:20px;padding-top:24px;display:grid;grid-template-columns:1fr 1fr;row-gap:18px}.num{font-size:30px;font-weight:700}.lab{font-size:16px;color:#777;margin-top:6px}.restart{width:auto;height:auto;padding:11px 20px;margin-top:20px;border:0;border-radius:10px;background:#eee;color:#333;font-size:17px;font-weight:700}.note{font-size:13px;color:#888;margin-top:20px;line-height:1.5}
+@media(min-width:701px){.top{height:72px;padding:28px 18px 0;font-size:15px}.wrap{margin:38px auto;padding:54px 26px 30px;border-radius:30px}h1{font-size:42px}.sub{font-size:22px}.ticket-row{font-size:20px}.practice{gap:14px}#answer,.captcha{height:96px}.ch{font-size:40px}.choices{max-width:430px}.choice{font-size:20px}}
+
+/* 整體縮小為原本 70% */
+.scale70{width:142.857%;transform:scale(.7);transform-origin:top left}
+.scale-shell{width:70%;margin:0 auto}
+</style></head><body><div class="scale-shell"><div class="scale70"><div class="top">驗證碼輸入練習</div><main class="wrap"><h1>驗證碼輸入練習</h1><div class="sub">票數 → 驗證碼 → 選項 → 確認<br>驗證碼輸入不分大小寫</div>
+<div class="ticket-row"><span class="ticket-label">選擇票數</span><div class="counter"><button type="button" id="minus">−</button><div class="count" id="ticketCount">0</div><button type="button" id="plus">＋</button></div></div>
+<div class="practice"><input id="answer" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="4" inputmode="text" placeholder=""><div class="captcha"><div id="captcha" class="chars"></div></div></div>
+<div class="choices"><label class="choice"><input type="radio" name="delivery" value="a"><span>寄送</span></label><label class="choice"><input type="radio" name="delivery" value="b"><span>超取</span></label></div>
+<button type="button" id="confirm">確認</button><div id="msg" class="msg"></div><div class="stats"><div><div id="correct" class="num">0</div><div class="lab">答對</div></div><div><div id="wrong" class="num">0</div><div class="lab">答錯</div></div><div><div id="rate" class="num">—</div><div class="lab">正確率</div></div><div><div id="speed" class="num">—</div><div class="lab">本次輸入速度</div></div></div><button type="button" id="restart" class="restart">重新開始</button><div class="note">每題票數從 0 開始、選項不預選。驗證碼錯誤會立即刷新；輸入欄不會全選，退位鍵一次刪除一個字。</div></main><script>
+const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",digits="0123456789",all=letters+digits;
+let expected="",correct=0,wrong=0,times=[],startedAt=0,ticketCount=0;
+const $=id=>document.getElementById(id),pick=s=>s[Math.floor(Math.random()*s.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function newCaptcha(){expected=shuffle([pick(letters),pick(digits),pick(all),pick(all)]).join("");let b=document.getElementById("captcha");b.innerHTML="";let f=["Arial","Verdana","Tahoma","Georgia","Courier New"];[...expected].forEach(c=>{let x=document.createElement("span");x.className="ch";x.textContent=c;x.style.transform=`translateY(${(Math.random()*14-7).toFixed(1)}px) rotate(${(Math.random()*24-12).toFixed(1)}deg)`;x.style.fontFamily=f[Math.floor(Math.random()*f.length)];b.appendChild(x)});let i=document.getElementById("answer");i.value="";document.getElementById("msg").textContent="";startedAt=performance.now();setTimeout(()=>i.focus(),30)}
-function stats(){let n=correct+wrong;document.getElementById("correct").textContent=correct;document.getElementById("wrong").textContent=wrong;document.getElementById("rate").textContent=n?Math.round(correct/n*100)+"%":"—";document.getElementById("speed").textContent=times.length?(times.reduce((a,b)=>a+b,0)/times.length).toFixed(2)+" 秒":"—"}
-function check(){let i=document.getElementById("answer"),typed=i.value.trim();let ok=typed.length===4&&typed.toLowerCase()===expected.toLowerCase();times.push((performance.now()-startedAt)/1000);if(ok){correct++;document.getElementById("msg").textContent="✓ 正確";stats();setTimeout(newCaptcha,350)}else{wrong++;document.getElementById("msg").textContent="× 錯誤，再輸入一次";stats();i.select()}}
-document.getElementById("confirm").onclick=check;document.getElementById("answer").onkeydown=e=>{if(e.key==="Enter")check()};document.getElementById("restart").onclick=()=>{correct=0;wrong=0;times=[];stats();newCaptcha()};stats();newCaptcha();
-</script></body></html>
+function renderCaptcha(){expected=shuffle([pick(letters),pick(digits),pick(all),pick(all)]).join("");const b=$("captcha");b.innerHTML="";const f=["Arial","Verdana","Tahoma","Georgia","Courier New"];[...expected].forEach(c=>{const x=document.createElement("span");x.className="ch";x.textContent=c;x.style.transform=`translateY(${(Math.random()*12-6).toFixed(1)}px) rotate(${(Math.random()*22-11).toFixed(1)}deg)`;x.style.fontFamily=f[Math.floor(Math.random()*f.length)];b.appendChild(x)})}
+function resetControls(){ticketCount=0;$("ticketCount").textContent="0";$("answer").value="";document.querySelectorAll('input[name="delivery"]').forEach(r=>r.checked=false)}
+function newQuestion(){resetControls();renderCaptcha();$("msg").textContent="";startedAt=performance.now();$("answer").blur()}
+function stats(){const n=correct+wrong;$("correct").textContent=correct;$("wrong").textContent=wrong;$("rate").textContent=n?Math.round(correct/n*100)+"%":"—";$("speed").textContent=times.length?(times.reduce((a,b)=>a+b,0)/times.length).toFixed(2)+" 秒":"—"}
+$("plus").onclick=()=>{if(ticketCount<2){ticketCount++;$("ticketCount").textContent=ticketCount}};
+$("minus").onclick=()=>{if(ticketCount>0){ticketCount--;$("ticketCount").textContent=ticketCount}};
+$("answer").addEventListener("input",e=>{e.target.value=e.target.value.replace(/[^A-Za-z0-9]/g,"").slice(0,4)});
+function check(){const typed=$("answer").value;const selected=document.querySelector('input[name="delivery"]:checked');const captchaOK=typed.length===4&&typed.toLowerCase()===expected.toLowerCase();const allOK=ticketCount>0&&captchaOK&&!!selected;
+ if(allOK){correct++;times.push((performance.now()-startedAt)/1000);$("msg").textContent="✓ 正確";stats();setTimeout(newQuestion,350);return}
+ wrong++;stats();
+ if(!captchaOK){$("msg").textContent="× 驗證碼錯誤，已刷新";renderCaptcha();$("answer").focus();return}
+ if(ticketCount===0){$("msg").textContent="× 請先選擇票數";return}
+ if(!selected){$("msg").textContent="× 請選擇寄送或超取";return}
+}
+$("confirm").onclick=check;$("answer").onkeydown=e=>{if(e.key==="Enter")e.preventDefault()};$("restart").onclick=()=>{correct=0;wrong=0;times=[];stats();newQuestion()};stats();newQuestion();
+</script></div></div>
+<script>
+/* 計時修正版：本題第一次操作 (+/-、驗證碼輸入框、單選項) 才開始 */
+(function(){
+  let roundStart = null;
+  let lastShown = null;
+
+  const startRoundTimer = () => {
+    if (roundStart === null) roundStart = performance.now();
+  };
+
+  function isStartControl(el){
+    if (!el) return false;
+    const id=(el.id||'').toLowerCase();
+    const cls=(typeof el.className==='string'?el.className:'').toLowerCase();
+    const type=(el.type||'').toLowerCase();
+    const txt=(el.textContent||'').trim();
+    return type==='radio' ||
+           id==='answer' || id.includes('captcha') ||
+           id.includes('plus') || id.includes('minus') ||
+           cls.includes('plus') || cls.includes('minus') ||
+           txt==='+' || txt==='＋' || txt==='-' || txt==='－';
+  }
+
+  document.addEventListener('pointerdown', function(e){
+    if (isStartControl(e.target) || (e.target.closest && e.target.closest('input[type="radio"]'))) {
+      startRoundTimer();
+    }
+  }, true);
+
+  document.addEventListener('focusin', function(e){
+    if ((e.target.id||'').toLowerCase()==='answer') startRoundTimer();
+  }, true);
+
+  // Observe the result/status area. When a correct result appears, freeze this round's time.
+  const observer = new MutationObserver(function(){
+    const bodyText=document.body.innerText;
+    if (roundStart !== null && /✓\s*正確|正確|成功/.test(bodyText)) {
+      const elapsed=(performance.now()-roundStart)/1000;
+      lastShown=elapsed;
+      const speedEl =
+        document.getElementById('speed') ||
+        document.getElementById('avg') ||
+        document.querySelector('[data-speed]');
+      if(speedEl) speedEl.textContent=elapsed.toFixed(2)+' 秒';
+      roundStart=null;
+    }
+  });
+  observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+
+  // When a new captcha is generated after success, timer remains idle until next first operation.
+})();
+</script>
+
+</body></html>
